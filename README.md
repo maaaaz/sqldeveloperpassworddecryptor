@@ -12,12 +12,12 @@ Features
 
 Prerequisites
 -----
-#### version 3
+#### Version 3
 Passwords are stored encrypted in the `connections.xml` file in those locations:
 * Windows: `C:\Users\<USER>\AppData\Roaming\SQL Developer\system<VERSION>\o.jdeveloper.db.connection.<VERSION>\connections.xml`
 * Linux: `~/.sqldeveloper/system<VERSION>/o.jdeveloper.db.connection.<VERSION>/connections.xml`
 
-#### version 4
+#### Version 4
 Passwords are stored encrypted in the same `connections.xml` file but the encryption key uses a machine-unique value 'db.system.id' in the `product-preferences.xml` accessible here:
 * Windows: `C:\Users\<USER>\AppData\Roaming\SQL Developer\system<VERSION>\o.sqldeveloper.<VERSION>\product-preferences.xml`
 * Linux: `~/.sqldeveloper/system<VERSION>/o.sqldeveloper.<VERSION>/product-preferences.xml`
@@ -46,7 +46,7 @@ Options:
 ```
 
 ### Examples
-* v3 password
+#### v3 password
 ```
 $ jython sqldeveloperpassworddecryptor.jy -p 054D4844D8549C0DB78EE1A98FE4E085B8A484D20A81F7DCF8
 [+] encrypted password: 054D4844D8549C0DB78EE1A98FE4E085B8A484D20A81F7DCF8
@@ -54,7 +54,7 @@ $ jython sqldeveloperpassworddecryptor.jy -p 054D4844D8549C0DB78EE1A98FE4E085B8A
 [+] decrypted password: password
 ```
 
-* v4 password
+#### v4 password
 ```
 $ python sqldeveloperpassworddecryptor.py -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9ee -p Shz0tQgqkuAfLy65s21gTVD7wacDYwG6
 [+] encrypted password: Shz0tQgqkuAfLy65s21gTVD7wacDYwG6

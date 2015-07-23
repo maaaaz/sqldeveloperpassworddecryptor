@@ -18,7 +18,7 @@ Passwords are stored encrypted in the `connections.xml` file in those locations:
 * Linux: `~/.sqldeveloper/system<VERSION>/o.jdeveloper.db.connection.<VERSION>/connections.xml`
 
 #### Version 4
-Passwords are stored encrypted in the same `connections.xml` file but the encryption key uses a machine-unique value 'db.system.id' in the `product-preferences.xml` accessible here:
+Passwords are stored encrypted in the same `connections.xml` file but the encryption key uses a machine-unique value `db.system.id` in the `product-preferences.xml` accessible here:
 * Windows: `C:\Users\<USER>\AppData\Roaming\SQL Developer\system<VERSION>\o.sqldeveloper.<VERSION>\product-preferences.xml`
 * Linux: `~/.sqldeveloper/system<VERSION>/o.sqldeveloper.<VERSION>/product-preferences.xml`
 
@@ -65,8 +65,8 @@ $ python sqldeveloperpassworddecryptor.py -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9e
 
 Dependencies
 ------------
-* For the Jython version: well, only Jython (`apt-get install jython` or download it [here](http://www.jython.org/downloads.html))
-* For the Python version: PyCrypto
+* For the `Jython` version: well, only Jython (`apt-get install jython` or download it [here](http://www.jython.org/downloads.html))
+* For the `Python` version: PyCrypto
 
 Changelog
 ---------

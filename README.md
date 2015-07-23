@@ -45,7 +45,8 @@ Options:
                         cb2cd7e3a9ee
 ```
 
-### Examples
+Examples
+--------
 #### v3 password
 ```
 $ jython sqldeveloperpassworddecryptor.jy -p 054D4844D8549C0DB78EE1A98FE4E085B8A484D20A81F7DCF8

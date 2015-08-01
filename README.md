@@ -7,7 +7,7 @@ A simple script to decrypt stored passwords from the Oracle SQL Developer IDE.
 
 Features
 --------
-* Support old v3 and v4 passwords
+* Support old v3 and current v4 passwords
 * Comes in 2 flavors: a Jython and a Python script
 
 Prerequisites
@@ -18,7 +18,7 @@ Passwords are stored encrypted in the `connections.xml` file in those locations:
 * Linux: `~/.sqldeveloper/system<VERSION>/o.jdeveloper.db.connection.<VERSION>/connections.xml`
 
 #### Version 4
-Passwords are stored encrypted in the same `connections.xml` file but the encryption key uses a machine-unique value `db.system.id` in the `product-preferences.xml` accessible here:
+Passwords are stored encrypted in the aforementioned `connections.xml` file but the encryption key uses a machine-unique value `db.system.id` in the `product-preferences.xml` file accessible here:
 * Windows: `C:\Users\<USER>\AppData\Roaming\SQL Developer\system<VERSION>\o.sqldeveloper.<VERSION>\product-preferences.xml`
 * Linux: `~/.sqldeveloper/system<VERSION>/o.sqldeveloper.<VERSION>/product-preferences.xml`
 

@@ -18,32 +18,32 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with sqldeveloperpassworddecrypter.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function 
 from Crypto.Cipher import DES
 import sys
-import xml.etree.ElementTree
+from xml.etree import ElementTree
 import base64
 import array
 import hashlib
+import codecs
 
 # Script version
-VERSION = '1.1'
+VERSION = '1.2'
+PASSWORD_ENCODING = 'ISO-8859-1'
 
-# OptionParser imports
-from optparse import OptionParser
-from optparse import OptionGroup
+import argparse
+import platform
+
+sql_developer_directory = '%APPDATA%\\SQL Developer\\' if platform.system() == 'Windows' else '~/.sqldeveloper/'
 
 # Options definition
-parser = OptionParser(usage="%prog [options]\nVersion: " + VERSION)
-
-main_grp = OptionGroup(parser, 'v3 and v4 parameters')
-main_grp.add_option('-p', '--encrypted-password', help = '(mandatory): password that you want to decrypt. Ex. -p 054D4844D8549C0DB78EE1A98FE4E085B8A484D20A81F7DCF8', nargs = 1)
-main_grp.add_option('-c', '--connections-file', help = '(optional): "connections.xml" file containing encrypted passwords. Ex. -c connections.xml', nargs = 1)
-
-v4_grp = OptionGroup(parser, 'v4 specific parameters')
-v4_grp.add_option('-d', '--db-system-id-value', help = '(mandatory for v4): machine-unique value of "db.system.id" attribute in the "product-preferences.xml" file. Ex: -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9ee', nargs = 1)
-#v4_grp.add_option('-f', '--db-system-id-file', help = '(optional): "product-preferences.xml" file  containing the "db.system.id" attribute value.', nargs = 1)
-
-parser.option_groups.extend([main_grp, v4_grp])
+parser = argparse.ArgumentParser(description='Decodes passwords from SQL developer. You can find the connections.xml file inside of "{0}".'.format(sql_developer_directory.replace('%', '%%')))
+parser.add_argument('--version', action='version', version='%(prog)s '+ VERSION)
+main_grp = parser.add_argument_group('v3 and v4 parameters')
+main_grp.add_argument('-p', '--encrypted-password', help='password that you want to decrypt from "o.jdeveloper.db.connection.*/connections.xml". Ex. -p 054D4844D8549C0DB78EE1A98FE4E085B8A484D20A81F7DCF8')
+main_grp.add_argument('-c', '--connections-file', help='"connections.xml" file containing encrypted passwords. Ex. -c connections.xml')
+v4_grp = parser.add_argument_group('v4 specific parameters')
+v4_grp.add_argument('-d', '--db-system-id-value', help='machine-unique value of "db.system.id" attribute in the "o.sqldeveloper.*/product-preferences.xml" file. Ex: -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9ee')
 
 # Handful functions
 def des_cbc_decrypt(encrypted_password, decryption_key, iv):
@@ -56,12 +56,12 @@ def des_cbc_decrypt(encrypted_password, decryption_key, iv):
 def decrypt_v4(encrypted, db_system_id, parser):
 	encrypted_password = base64.b64decode(encrypted)
 	
-	salt = '051399429372e8ad'.decode('hex')
+	salt = codecs.decode('051399429372e8ad', 'hex')
 	num_iteration = 42
 			
 	# key generation from a machine-unique value with a fixed salt
-	key = db_system_id + salt
-	for i in xrange(num_iteration):
+	key = codecs.encode(db_system_id, 'ASCII') + salt
+	for i in range(num_iteration):
 		m = hashlib.md5(key)
 		key = m.digest()
 	
@@ -70,7 +70,7 @@ def decrypt_v4(encrypted, db_system_id, parser):
 	
 	decrypted = des_cbc_decrypt(encrypted_password, secret_key, iv)
 	
-	return decrypted 
+	return codecs.decode(decrypted, PASSWORD_ENCODING) 
 
 def decrypt_v3(encrypted, parser):
 	if len(encrypted) % 2 != 0:
@@ -79,36 +79,36 @@ def decrypt_v3(encrypted, parser):
 	if not(encrypted.startswith("05")):
 		parser.error('v3 encrypted password string not beginning with "05", aborting.\nRemember, for a v4 password you need the db.system.id value !')
 	
-	encrypted = encrypted.decode('hex')
+	encrypted = codecs.decode(encrypted, 'hex')
 	secret_key = encrypted[1:9]
 	encrypted_password = encrypted[9:]
 	iv = "\x00" * 8
 	
 	decrypted = des_cbc_decrypt(encrypted_password, secret_key, iv)
 	
-	return decrypted 
+	return codecs.decode(decrypted, PASSWORD_ENCODING)
 
-
-def main(options, arguments):
+def main(options):
 	"""
 		Dat main
 	"""
 	global parser, VERSION
-	print 'sqldeveloperpassworddecryptor.py version %s\n' % VERSION
+	print('sqldeveloperpassworddecryptor.py version %s\n' % VERSION)
 	
-	if (options.encrypted_password):
-		print "[+] encrypted password: %s" % options.encrypted_password
+	if options.encrypted_password:
+		print("[+] encrypted password: %s" % options.encrypted_password)
 		if options.db_system_id_value:
 			# v4 decryption
-			print "[+] db.system.id value: %s" % options.db_system_id_value
-			print "\n[+] decrypted password: %s" % decrypt_v4(options.encrypted_password, options.db_system_id_value, parser)
+			print("[+] db.system.id value: %s" % options.db_system_id_value)
+			print("\n[+] decrypted password: %s" % decrypt_v4(options.encrypted_password, options.db_system_id_value, parser))
+		
 		else:
 			#v3 decryption
-			print "\n[+] decrypted password: %s" % decrypt_v3(options.encrypted_password, parser)
-
-	elif (options.connections_file):
-		print "[+] Parsing file: %s" % options.connections_file
-		root = xml.etree.ElementTree.parse(options.connections_file).getroot()
+			print("\n[+] decrypted password: %s" % decrypt_v3(options.encrypted_password, parser))
+	elif options.connections_file:
+		processed_file = True
+		print("[+] Parsing file: %s" % options.connections_file)
+		root = ElementTree.parse(options.connections_file).getroot()
 		for level1 in root.findall('.//Reference'):
 			con = {}
 			for level2 in level1.findall('.//StringRefAddr'):
@@ -116,16 +116,12 @@ def main(options, arguments):
 					con[level2.get('addrType')] = decrypt_v3(level2[0].text, parser)
 				elif level2.get('addrType') in ['ConnName', 'hostname', 'port', 'user', 'serviceName']: 
 					con[level2.get('addrType')] = level2[0].text
-			print "[+] Decrypted Connection: %s" % con
-
+			print("[+] Decrypted Connection: %s" % con)
 	else:
 		parser.error("Please specify a file to decrypt")	
 	
-	print "[+] Task successfully completed." 
-	return None
+	print("[+] Task successfully completed.")
 	
-
-
 if __name__ == "__main__" :
-	options, arguments = parser.parse_args()
-	main(options, arguments)
+	options = parser.parse_args()
+	main(options)

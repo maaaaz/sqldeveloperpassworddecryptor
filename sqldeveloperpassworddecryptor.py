@@ -37,7 +37,7 @@ import platform
 sql_developer_directory = '%APPDATA%\\SQL Developer\\' if platform.system() == 'Windows' else '~/.sqldeveloper/'
 
 # Options definition
-parser = argparse.ArgumentParser(description='Decodes passwords from SQL developer. You can find the connections.xml file inside of "{0}".'.format(sql_developer_directory.replace('%', '%%')))
+parser = argparse.ArgumentParser(description='Decodes passwords from SQL developer. If you don\'t explicitly specify an encrypted password or a connections file, then %(prog)s will search through "{0}" for connections.xml files and process them.'.format(sql_developer_directory.replace('%', '%%')))
 parser.add_argument('--version', action='version', version='%(prog)s '+ VERSION)
 main_grp = parser.add_argument_group('v3 and v4 parameters')
 main_grp.add_argument('-p', '--encrypted-password', help='password that you want to decrypt from "o.jdeveloper.db.connection.*/connections.xml". Ex. -p 054D4844D8549C0DB78EE1A98FE4E085B8A484D20A81F7DCF8')
@@ -88,6 +88,12 @@ def decrypt_v3(encrypted, parser):
 	
 	return codecs.decode(decrypted, PASSWORD_ENCODING)
 
+def search_connections_files():
+	import os
+	for root, dirs, files in os.walk(os.path.expandvars(sql_developer_directory)):
+		if 'connections.xml' in files:
+			yield os.path.join(root, 'connections.xml')
+	
 def main(options):
 	"""
 		Dat main
@@ -105,10 +111,18 @@ def main(options):
 		else:
 			#v3 decryption
 			print("\n[+] decrypted password: %s" % decrypt_v3(options.encrypted_password, parser))
-	elif options.connections_file:
+		return
+	
+	if options.connections_file:
+		connections_files = [options.connections_file]
+	else:
+		connections_files = search_connections_files()
+	
+	processed_file = False
+	for connections_file in connections_files:
 		processed_file = True
-		print("[+] Parsing file: %s" % options.connections_file)
-		root = ElementTree.parse(options.connections_file).getroot()
+		print("[+] Parsing file: %s" % connections_file)
+		root = ElementTree.parse(connections_file).getroot()
 		for level1 in root.findall('.//Reference'):
 			con = {}
 			for level2 in level1.findall('.//StringRefAddr'):
@@ -117,8 +131,8 @@ def main(options):
 				elif level2.get('addrType') in ['ConnName', 'hostname', 'port', 'user', 'serviceName']: 
 					con[level2.get('addrType')] = level2[0].text
 			print("[+] Decrypted Connection: %s" % con)
-	else:
-		parser.error("Please specify a file to decrypt")	
+	if not processed_file:
+		parser.error("Could not find a connections.xml file. Please specify a file or password to decrypt.")
 	
 	print("[+] Task successfully completed.")
 	

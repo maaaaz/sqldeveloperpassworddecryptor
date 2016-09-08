@@ -12,7 +12,7 @@
 #
 # sqldeveloperpassworddecrypter is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
@@ -26,6 +26,8 @@ import base64
 import array
 import hashlib
 import codecs
+import os
+
 
 # Script version
 VERSION = '1.2'
@@ -89,11 +91,24 @@ def decrypt_v3(encrypted, parser):
 	return codecs.decode(decrypted, PASSWORD_ENCODING)
 
 def search_connections_files():
-	import os
-	for root, dirs, files in os.walk(os.path.expandvars(sql_developer_directory)):
+	for root, dirs, files in os.walk(os.path.expanduser(os.path.expandvars(sql_developer_directory))):
 		if 'connections.xml' in files:
 			yield os.path.join(root, 'connections.xml')
 	
+def parse_product_preferences_for_db_system_id(prefs_file):
+	root = ElementTree.parse(prefs_file).getroot()
+	for child in root:
+		if child.tag == 'value' and child.get('n') == 'db.system.id':
+			return child.get('v')
+	return None
+	 
+def search_db_system_id(sqldeveloper_system):
+	for root, dirs, files in os.walk(sqldeveloper_system):
+		if 'product-preferences.xml' in files:
+			return parse_product_preferences_for_db_system_id(os.path.join(root,'product-preferences.xml'))
+	return None
+			
+
 def main(options):
 	"""
 		Dat main
@@ -127,7 +142,11 @@ def main(options):
 			con = {}
 			for level2 in level1.findall('.//StringRefAddr'):
 				if level2.get('addrType') == 'password':
-					con[level2.get('addrType')] = decrypt_v3(level2[0].text, parser)
+					db_system_id_value = (options.db_system_id_value or search_db_system_id(os.path.dirname(os.path.dirname(connections_file))))
+					if db_system_id_value:
+						con[level2.get('addrType')] = decrypt_v4(level2[0].text, db_system_id_value, parser)
+					else:
+						con[level2.get('addrType')] = decrypt_v3(level2[0].text, parser)
 				elif level2.get('addrType') in ['ConnName', 'hostname', 'port', 'user', 'serviceName']: 
 					con[level2.get('addrType')] = level2[0].text
 			print("[+] Decrypted Connection: %s" % con)

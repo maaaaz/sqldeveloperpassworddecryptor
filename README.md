@@ -41,8 +41,8 @@ Options:
     -d DB_SYSTEM_ID_VALUE, --db-system-id-value=DB_SYSTEM_ID_VALUE
                         (mandatory for v4): machine-unique value of
                         "db.system.id" attribute in the "product-
-                        preferences.xml" file. Ex: -d 6b2f64b2-e83e-49a5-9abf-
-                        cb2cd7e3a9ee
+                        preferences.xml" file  or the export file encryption
+                        key. Ex: -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9ee
 ```
 
 Examples

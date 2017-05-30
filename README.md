@@ -21,6 +21,7 @@ Passwords are stored encrypted in the `connections.xml` file in those locations:
 Passwords are stored encrypted in the aforementioned `connections.xml` file but the encryption key by default uses a machine-unique value `db.system.id` in the `product-preferences.xml` file accessible here:
 * Windows: `C:\Users\<USER>\AppData\Roaming\SQL Developer\system<VERSION>\o.sqldeveloper.<VERSION>\product-preferences.xml`
 * Linux: `~/.sqldeveloper/system<VERSION>/o.sqldeveloper.<VERSION>/product-preferences.xml`  
+  
 When exporting one or more connections in version 4, the user is asked to type a password: **that password is then used as a key to encrypt the entries instead of the `db.system.id` value.**
 
 Options

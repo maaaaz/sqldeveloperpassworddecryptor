@@ -1,32 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# This file is part of sqldeveloperpassworddecrypter.
+# This file is part of sqldeveloperpassworddecryptor.
 #
 # Copyright (C) 2015, Thomas Debize <tdebize at mail.com>
 # All rights reserved.
 #
-# sqldeveloperpassworddecrypter is free software: you can redistribute it and/or modify
+# sqldeveloperpassworddecryptor is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# sqldeveloperpassworddecrypter is distributed in the hope that it will be useful,
+# sqldeveloperpassworddecryptor is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with sqldeveloperpassworddecrypter.  If not, see <http://www.gnu.org/licenses/>.
+# along with sqldeveloperpassworddecryptor.  If not, see <http://www.gnu.org/licenses/>.
 
-from Crypto.Cipher import DES
+from Cryptodome.Cipher import DES
 import sys
 import base64
 import array
 import hashlib
 
 # Script version
-VERSION = '1.1'
+VERSION = '1.2'
 
 # OptionParser imports
 from optparse import OptionParser
@@ -88,11 +88,13 @@ def decrypt_v3(encrypted, parser):
 	
 	return decrypted 
 
-def main(options, arguments):
+def main():
 	"""
 		Dat main
 	"""
 	global parser, VERSION
+	
+	options, arguments = parser.parse_args()
 	
 	if not(options.encrypted_password):
 		parser.error("Please specify a password to decrypt")
@@ -112,5 +114,4 @@ def main(options, arguments):
 	return None
 	
 if __name__ == "__main__" :
-	options, arguments = parser.parse_args()
-	main(options, arguments)
+	main()

@@ -22,7 +22,7 @@ Passwords are stored encrypted in the aforementioned `connections.xml` file but 
 * Windows: `C:\Users\<USER>\AppData\Roaming\SQL Developer\system<VERSION>\o.sqldeveloper.<VERSION>\product-preferences.xml`
 * Linux: `~/.sqldeveloper/system<VERSION>/o.sqldeveloper.<VERSION>/product-preferences.xml`  
   
-When exporting one or more connections in version 4, the user is asked to type a password: **that password is then used as a key to encrypt the entries instead of the `db.system.id` value.**
+When exporting one or more connections in **version 4**, the user is asked to type a password: **that password is then used as a key to encrypt the entries instead of the `db.system.id` value.**
 
 Options
 -------
@@ -66,25 +66,28 @@ $ python sqldeveloperpassworddecryptor.py -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9e
 [+] decrypted password: s4gswagswaag!5465636MP
 ```
 
-Dependencies
-------------
+Dependencies and installation
+-----------------------------
 * For the `Jython` version: well, only Jython (`apt-get install jython` or download it [here](http://www.jython.org/downloads.html))
-* For the `Python` version: PyCrypto
+* For the `Python` version:
+  * The **easiest way** to setup everything: `pip install sqldeveloperpassworddecryptor` and then directly use `$ sqldeveloperpassworddecryptor`
+  * Or manually install PyCryptodome: `pip install pycryptodomex`
 
 Changelog
 ---------
+* version 1.2 - 07/14/2017: replacing PyCrypto by PyCryptodomex for [these reasons](https://blog.sqreen.io/stop-using-pycrypto-use-pycryptodome/)
 * version 1.1 - 05/30/2017: shebang addition
 * version 1.0 - 07/23/2014: Initial commit
 
 Copyright and license
 ---------------------
-sqldeveloperpassworddecryptor is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+sqldeveloperpassworddecryptor is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software  Foundation, either version 3 of the License, or (at your option) any later version.
 
 sqldeveloperpassworddecryptor is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
-See the GNU General Public License for more details.
+See the GNU Lesser General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with sqldeveloperpassworddecryptor. 
+You should have received a copy of the GNU Lesser General Public License along with sqldeveloperpassworddecryptor. 
 If not, see http://www.gnu.org/licenses/.
 
 Greetings

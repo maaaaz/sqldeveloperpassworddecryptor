@@ -72,6 +72,21 @@ Dependencies and installation
 * For the `Python` version:
   * The **easiest way** to setup everything: `pip install sqldeveloperpassworddecryptor` and then directly use `$ sqldeveloperpassworddecryptor`
   * Or manually install PyCryptodome: `pip install pycryptodomex`
+  * Or use Docker image.
+
+Docker usage
+------------
+#### Build image
+```
+$ docker build -t sqldeveloperpassworddecryptor .
+```
+
+#### Run image
+```
+$ alias sqldeveloperpassworddecryptor="docker run -it sqldeveloperpassworddecryptor"
+$ sqldeveloperpassworddecryptor -d "${DB_SYSTEM_ID_VALUE}" -p "${ENCRYPTED_PASSWORD}"
+```
+
 
 Changelog
 ---------

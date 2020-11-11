@@ -14,12 +14,12 @@ Prerequisites
 -----
 #### Version 3
 Passwords are stored encrypted in the `connections.xml` file in those locations:
-* Windows: `C:\Users\<USER>\AppData\Roaming\SQL Developer\system<VERSION>\o.jdeveloper.db.connection.<VERSION>\connections.xml`
+* Windows: `%APPDATA%\SQL Developer\system<VERSION>\o.jdeveloper.db.connection.<VERSION>\connections.xml`
 * Linux: `~/.sqldeveloper/system<VERSION>/o.jdeveloper.db.connection.<VERSION>/connections.xml`
 
 #### Version 4
 Passwords are stored encrypted in the aforementioned `connections.xml` file but the encryption key by default uses a machine-unique value `db.system.id` in the `product-preferences.xml` file accessible here:
-* Windows: `C:\Users\<USER>\AppData\Roaming\SQL Developer\system<VERSION>\o.sqldeveloper.<VERSION>\product-preferences.xml`
+* Windows: `%APPDATA%\SQL Developer\system<VERSION>\o.sqldeveloper.<VERSION>\product-preferences.xml`
 * Linux: `~/.sqldeveloper/system<VERSION>/o.sqldeveloper.<VERSION>/product-preferences.xml`  
   
 When exporting one or more connections in **version 4**, the user is asked to type a password: **that password is then used as a key to encrypt the entries instead of the `db.system.id` value.**
@@ -68,13 +68,14 @@ $ python sqldeveloperpassworddecryptor.py -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9e
 
 Dependencies and installation
 -----------------------------
-* For the `Jython` version: well, only Jython (`apt-get install jython` or download it [here](http://www.jython.org/downloads.html))
+* For the `Jython` version: well, only Jython (`apt-get install jython` or download it [here](https://www.jython.org/download))
 * For the `Python` version:
   * The **easiest way** to setup everything: `pip install sqldeveloperpassworddecryptor` and then directly use `$ sqldeveloperpassworddecryptor`
   * Or manually install PyCryptodome: `pip install pycryptodomex`
 
 Changelog
 ---------
+* version 2.0 - 11/11/2020: Python 3 support
 * version 1.2 - 07/14/2017: replacing PyCrypto by PyCryptodomex for [these reasons](https://blog.sqreen.io/stop-using-pycrypto-use-pycryptodome/)
 * version 1.1 - 05/30/2017: shebang addition
 * version 1.0 - 07/23/2014: Initial commit

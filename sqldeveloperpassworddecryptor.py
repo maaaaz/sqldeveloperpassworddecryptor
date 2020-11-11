@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This file is part of sqldeveloperpassworddecryptor.
 #
-# Copyright (C) 2015, Thomas Debize <tdebize at mail.com>
+# Copyright (C) 2015, 2020 Thomas Debize <tdebize at mail.com>
 # All rights reserved.
 #
 # sqldeveloperpassworddecryptor is free software: you can redistribute it and/or modify
@@ -19,6 +19,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with sqldeveloperpassworddecryptor.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from Cryptodome.Cipher import DES
 import sys
 import base64
@@ -26,7 +30,7 @@ import array
 import hashlib
 
 # Script version
-VERSION = '1.2'
+VERSION = '2.0'
 
 # OptionParser imports
 from optparse import OptionParser
@@ -47,71 +51,71 @@ parser.option_groups.extend([main_grp, v4_grp])
 
 # Handful functions
 def des_cbc_decrypt(encrypted_password, decryption_key, iv):
-	unpad = lambda s : s[:-ord(s[len(s)-1:])]
-	crypter = DES.new(decryption_key, DES.MODE_CBC, iv)
-	decrypted_password = unpad(crypter.decrypt(encrypted_password))
-	
-	return decrypted_password
+    unpad = lambda s : s[:-ord(s[len(s)-1:])]
+    crypter = DES.new(decryption_key, DES.MODE_CBC, iv)
+    decrypted_password = unpad(crypter.decrypt(encrypted_password))
+    
+    return decrypted_password.decode('utf-8')
 
 def decrypt_v4(encrypted, db_system_id, parser):
-	encrypted_password = base64.b64decode(encrypted)
-	
-	salt = '051399429372e8ad'.decode('hex')
-	num_iteration = 42
-			
-	# key generation from a machine-unique value with a fixed salt
-	key = db_system_id + salt
-	for i in xrange(num_iteration):
-		m = hashlib.md5(key)
-		key = m.digest()
-	
-	secret_key = key[:8]
-	iv = key[8:]
-	
-	decrypted = des_cbc_decrypt(encrypted_password, secret_key, iv)
-	
-	return decrypted 
+    encrypted_password = base64.b64decode(encrypted)
+    
+    salt = bytearray.fromhex('051399429372e8ad')
+    num_iteration = 42
+            
+    # key generation from a machine-unique value with a fixed salt
+    key = bytearray(db_system_id, 'ascii') + salt
+    for i in range(num_iteration):
+        m = hashlib.md5(key)
+        key = m.digest()
+    
+    secret_key = key[:8]
+    iv = key[8:]
+    
+    decrypted = des_cbc_decrypt(encrypted_password, secret_key, iv)
+    
+    return decrypted 
 
 def decrypt_v3(encrypted, parser):
-	if len(encrypted) % 2 != 0:
-		parser.error('v3 encrypted password length is not even (%s), aborting.' % len(encrypted))
-	
-	if not(encrypted.startswith("05")):
-		parser.error('v3 encrypted password string not beginning with "05", aborting.\nRemember, for a v4 password you need the db.system.id value !')
-	
-	encrypted = encrypted.decode('hex')
-	secret_key = encrypted[1:9]
-	encrypted_password = encrypted[9:]
-	iv = "\x00" * 8
-	
-	decrypted = des_cbc_decrypt(encrypted_password, secret_key, iv)
-	
-	return decrypted 
+    if len(encrypted) % 2 != 0:
+        parser.error('v3 encrypted password length is not even (%s), aborting.' % len(encrypted))
+    
+    if not(encrypted.startswith("05")):
+        parser.error('v3 encrypted password string not beginning with "05", aborting.\nRemember, for a v4 password you need the db.system.id value !')
+    
+    encrypted = bytearray.fromhex(encrypted)
+    secret_key = encrypted[1:9]
+    encrypted_password = encrypted[9:]
+    iv = bytearray("\x00" * 8, 'ascii')
+    
+    decrypted = des_cbc_decrypt(encrypted_password, secret_key, iv)
+    
+    return decrypted 
 
 def main():
-	"""
-		Dat main
-	"""
-	global parser, VERSION
-	
-	options, arguments = parser.parse_args()
-	
-	if not(options.encrypted_password):
-		parser.error("Please specify a password to decrypt")
-	
-	print 'sqldeveloperpassworddecryptor.py version %s\n' % VERSION
-	print "[+] encrypted password: %s" % options.encrypted_password
-	
-	if options.db_system_id_value:
-		# v4 decryption
-		print "[+] db.system.id value: %s" % options.db_system_id_value
-		print "\n[+] decrypted password: %s" % decrypt_v4(options.encrypted_password, options.db_system_id_value, parser)
-	
-	else:
-		#v3 decryption
-		print "\n[+] decrypted password: %s" % decrypt_v3(options.encrypted_password, parser)
-	
-	return None
-	
+    """
+        Dat main
+    """
+    global parser, VERSION
+    
+    options, arguments = parser.parse_args()
+    
+    if not(options.encrypted_password):
+        parser.error("Please specify a password to decrypt")
+    
+    print('sqldeveloperpassworddecryptor.py version %s\n' % VERSION)
+    print("[+] encrypted password: %s" % options.encrypted_password)
+    
+    if options.db_system_id_value:
+        # v4 decryption
+        print("[+] db.system.id value: %s" % options.db_system_id_value)
+        print("\n[+] decrypted password: %s" % decrypt_v4(options.encrypted_password, options.db_system_id_value, parser))
+    
+    else:
+        #v3 decryption
+        print("\n[+] decrypted password: %s" % decrypt_v3(options.encrypted_password, parser))
+    
+    return None
+    
 if __name__ == "__main__" :
-	main()
+    main()

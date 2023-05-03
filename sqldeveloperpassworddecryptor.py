@@ -30,7 +30,7 @@ import array
 import hashlib
 
 # Script version
-VERSION = '2.1'
+VERSION = '2.2'
 
 # OptionParser imports
 from optparse import OptionParser
@@ -43,6 +43,7 @@ main_grp = OptionGroup(parser, 'Main parameters')
 main_grp.add_option('-p', '--encrypted-password', help = '(mandatory): password that you want to decrypt. Ex. -p 054D4844D8549C0DB78EE1A98FE4E085B8A484D20A81F7DCF8', nargs = 1)
 main_grp.add_option('-d', '--db-system-id-value', help = '(mandatory from v4): installation-unique value of "db.system.id" attribute in the "product-preferences.xml" file, or the export file encryption key. Ex: -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9ee', nargs = 1)
 main_grp.add_option('-o', '--old', help = '(mandatory between v4 and v19.1) if the password you want to decrypt is for a product version between 4 and 19.1', action = 'store_true', default = False)
+main_grp.add_option('-a', '--aged', help = '(mandatory between v19.2 and v22.2) if the password you want to decrypt is for a product version between 19.2 and 22.2', action = 'store_true', default = False)
 #main_grp.add_option('-c', '--connections-file', help = '(optional): "connections.xml" file containing encrypted passwords.', nargs = 1)
 #main_grp.add_option('-f', '--db-system-id-file', help = '(optional): "product-preferences.xml" file  containing the "db.system.id" attribute value.', nargs = 1)
 
@@ -54,6 +55,13 @@ def aes_cbc_decrypt(encrypted_password, decryption_key, iv):
     crypter = AES.new(decryption_key, AES.MODE_CBC, iv)
     decrypted_password = unpad(crypter.decrypt(encrypted_password))
     
+    return decrypted_password.decode('utf-8')
+
+def aes_gcm_decrypt(encrypted_password, decryption_key, nonce, aad, tag):
+    crypter = AES.new(decryption_key, AES.MODE_GCM, nonce)
+    crypter.update(aad)
+    decrypted_password = crypter.decrypt_and_verify(encrypted_password, tag)
+
     return decrypted_password.decode('utf-8')
     
 def des_cbc_decrypt(encrypted_password, decryption_key, iv):
@@ -110,8 +118,27 @@ def decrypt_v19_2(encrypted, db_system_id, parser):
     try:
         decrypted = aes_cbc_decrypt(encrypted_password, key, iv)
     except:
-        parser.error('Error during decryption. Remember, for a v4 -> v19.1 password you need the "-o" option')
+        parser.error('Error during decryption. Remember, for a v4 -> v19.1 password you need the "-o" option'
+                     ' and for a v19.2 -> v22.2 password you need the "-a" option')
     
+    return decrypted
+
+def decrypt_v23_1(encrypted, db_system_id, parser):
+    encrypted_password = base64.b64decode(encrypted)
+
+    salt = array.array('b', [6, -74, 97, 35, 61, 104, 50, -72])
+    key = hashlib.pbkdf2_hmac("sha256", db_system_id.encode(), salt, 5000, 32)
+
+    nonce = encrypted_password[:12]
+    tag = encrypted_password[-16:]
+    encrypted_password = encrypted_password[12:-16]
+
+    try:
+        decrypted = aes_gcm_decrypt(encrypted_password, key, nonce, "password".encode(), tag)
+    except:
+        parser.error('Error during decryption. Remember, for a v4 -> v19.1 password you need the "-o" option'
+                     ' and for a v19.2 -> v22.2 password you need the "-a" option')
+
     return decrypted
 
 def main():
@@ -134,10 +161,14 @@ def main():
         if options.old:
             print("\n[+] decrypted password: %s" % decrypt_v4(options.encrypted_password, options.db_system_id_value))
         
-        else:
-        # from v19.2 decryption
+        elif options.aged:
+        # v19.2->v22.2 decryption
             print("\n[+] decrypted password: %s" % decrypt_v19_2(options.encrypted_password, options.db_system_id_value, parser))
     
+        else:
+        # from v23.1 decryption
+            print("\n[+] decrypted password: %s" % decrypt_v23_1(options.encrypted_password, options.db_system_id_value, parser))
+
     else:
         #v3 decryption
         print("\n[+] decrypted password: %s" % decrypt_v3(options.encrypted_password, parser))

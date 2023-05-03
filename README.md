@@ -7,7 +7,7 @@ A simple script to decrypt stored passwords from the Oracle SQL Developer IDE.
 
 Features
 --------
-* Support old (v3, v4->v19.1) and new (from v19.2) password encryption
+* Support old (v3, v4->v19.1), new (from v19.2) and new new (from v23.1) password encryption
 * Comes in 2 flavors: a Jython and a Python script
 
 Prerequisites
@@ -45,7 +45,7 @@ Options
 ```
 $ python sqldeveloperpassworddecryptor.py -h
 Usage: sqldeveloperpassworddecryptor.py [options]
-Version: 2.1
+Version: 2.2
 
 Options:
   -h, --help            show this help message and exit
@@ -62,6 +62,9 @@ Options:
     -o, --old           (mandatory between v4 and v19.1) if the password you
                         want to decrypt is for a product version between 4 and
                         19.1
+    -a, --aged          (mandatory between v19.2 and v22.2) if the password
+                        you want to decrypt is for a product version between
+                        19.2 and 22.2
 ```
 
 Examples
@@ -77,7 +80,7 @@ $ jython sqldeveloperpassworddecryptor.jy -p 054D4844D8549C0DB78EE1A98FE4E085B8A
 #### v4 -> v19.1 password
 ```
 $ python sqldeveloperpassworddecryptor.py -d 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9ee -p Shz0tQgqkuAfLy65s21gTVD7wacDYwG6 -o
-sqldeveloperpassworddecryptor.py version 2.1
+sqldeveloperpassworddecryptor.py version 2.2
 
 [+] encrypted password: Shz0tQgqkuAfLy65s21gTVD7wacDYwG6
 [+] db.system.id value: 6b2f64b2-e83e-49a5-9abf-cb2cd7e3a9ee
@@ -85,13 +88,24 @@ sqldeveloperpassworddecryptor.py version 2.1
 [+] decrypted password: s4gswagswaag!5465636MP
 ```
 
-#### from v19.2 password
+#### v19.2 -> v22.2 password
 ```
-$ python sqldeveloperpassworddecryptor.py -d 7d97189a-4e22-4061-bc07-35b9d2b39f3c -p "LUA63VW21TqaHNJSvKF6DI8zv1/dvXzBhyMPVN8lAws="
-sqldeveloperpassworddecryptor.py version 2.1
+$ python sqldeveloperpassworddecryptor.py -d 7d97189a-4e22-4061-bc07-35b9d2b39f3c -p "LUA63VW21TqaHNJSvKF6DI8zv1/dvXzBhyMPVN8lAws=" -a
+sqldeveloperpassworddecryptor.py version 2.2
 
 [+] encrypted password: LUA63VW21TqaHNJSvKF6DI8zv1/dvXzBhyMPVN8lAws=
 [+] db.system.id value: 7d97189a-4e22-4061-bc07-35b9d2b39f3c
+
+[+] decrypted password: password1
+```
+
+#### from v23.1 password
+```
+$ python sqldeveloperpassworddecryptor.py -d 362c7a60-989c-40ba-b175-eabc5e2dcd6f -p "/VKI/94HPLQpSHIp4uJESEIe/gA5DS6sNjQzVLMKKLlU7HnG+Q=="
+sqldeveloperpassworddecryptor.py version 2.2
+
+[+] encrypted password: /VKI/94HPLQpSHIp4uJESEIe/gA5DS6sNjQzVLMKKLlU7HnG+Q==
+[+] db.system.id value: 362c7a60-989c-40ba-b175-eabc5e2dcd6f
 
 [+] decrypted password: password1
 ```
@@ -105,6 +119,7 @@ Dependencies and installation
 
 Changelog
 ---------
+* version 2.2 - 05/03/2022: new encryption type support (from v23.1)
 * version 2.1 - 08/11/2021: new encryption type support (from v19.2)
 * version 2.0 - 11/11/2020: Python 3 support
 * version 1.2 - 07/14/2017: replacing PyCrypto by PyCryptodomex for [these reasons](https://blog.sqreen.io/stop-using-pycrypto-use-pycryptodome/)
